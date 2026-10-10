@@ -1,0 +1,16 @@
+<div class="row">
+    <div class="col-md-6 col-lg-4 mx-auto mt-4">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body text-center p-5">
+                <img class="avatar-img avatar-xl rounded-circle mb-3 shadow-sm" src="https://ui-avatars.com/api/?name=<%= user || 'Admin' %>&background=0d6efd&color=fff&size=128" alt="Profile">
+                <h3 class="mb-1 fw-bold"><%= user || 'Admin Store' %></h3>
+                <p class="text-muted mb-4"><i class="bi bi-person-badge me-2"></i>Administrator</p>
+                
+                <div class="d-grid gap-2">
+                    <a href="/" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Kembali ke Dashboard</a>
+                    <a href="/logout" class="btn btn-danger"><i class="bi bi-box-arrow-right me-2"></i>Keluar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

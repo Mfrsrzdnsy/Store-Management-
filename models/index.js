@@ -3,6 +3,7 @@ const Category = require('./Category');
 const Product = require('./Product');
 const Transaction = require('./Transaction');
 const TransactionItem = require('./TransactionItem');
+const User = require('./User')(sequelize);
 
 // Define Relationships
 Category.hasMany(Product);
@@ -19,5 +20,6 @@ module.exports = {
     Category,
     Product,
     Transaction,
-    TransactionItem
+    TransactionItem,
+    User
 };

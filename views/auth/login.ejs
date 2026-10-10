@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Login Aplikasi Store Management">
+  <title>Login | Store Management</title>
+
+  <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/assets/vendors/bootstrap-icons/bootstrap-icons.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body class="auth-body">
+  <button class="icon-button theme-toggle auth-theme-toggle" type="button" id="themeToggleBtn" aria-label="Switch color theme" title="Switch color theme">
+    <i class="bi bi-moon-stars" id="themeIcon" aria-hidden="true"></i>
+  </button>
+  
+  <main class="auth-page">
+    <section class="auth-card shadow-lg">
+      <a class="auth-brand" href="#">
+        <span class="brand-icon bg-primary text-white p-2 rounded"><i class="bi bi-shop" aria-hidden="true"></i></span>
+        <span><strong>Store Management</strong><small>Aplikasi Kasir & Inventaris</small></span>
+      </a>
+      
+      <div class="auth-visual">
+        <div class="bg-primary bg-opacity-10 w-100 h-100 d-flex align-items-center justify-content-center">
+            <i class="bi bi-cash-coin text-primary opacity-50" style="font-size: 8rem;"></i>
+        </div>
+      </div>
+      
+      <form id="loginForm" action="/login" method="POST" class="needs-validation" novalidate>
+        <div class="mb-4">
+          <p class="eyebrow mb-1">Akses Sistem</p>
+          <h1 class="h3 mb-1">Login</h1>
+          <p class="text-muted mb-0">Masuk untuk mengelola toko Anda.</p>
+        </div>
+        
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="alert alert-danger py-2"><i class="bi bi-exclamation-triangle me-2"></i> <%= error %></div>
+        <% } %>
+        
+        <div class="mb-3">
+          <label class="form-label" for="username">Username</label>
+          <input class="form-control" name="username" id="username" type="text" required autofocus>
+          <div class="invalid-feedback">Masukkan username.</div>
+        </div>
+        
+        <div class="mb-4">
+          <div class="d-flex justify-content-between">
+            <label class="form-label" for="password">Password</label>
+          </div>
+          <input class="form-control" name="password" id="password" type="password" required>
+          <div class="invalid-feedback">Masukkan password.</div>
+        </div>
+        
+        <button class="btn btn-primary w-100 py-2" type="submit"><i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i> Masuk</button>
+      </form>
+      
+      <div class="auth-footer mt-4 text-center">Belum punya akun? <a href="/register" class="fw-semibold">Daftar sekarang</a></div>
+    </section>
+  </main>
+
+  <script src="/assets/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <script>
+    // Theme toggle logic (sama seperti main.js tapi mandiri agar login page tidak error mencari element sidebar)
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const htmlElement = document.documentElement;
+    
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    htmlElement.setAttribute('data-bs-theme', savedTheme);
+    updateIcon(savedTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = htmlElement.getAttribute('data-bs-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      htmlElement.setAttribute('data-bs-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateIcon(newTheme);
+    });
+
+    function updateIcon(theme) {
+      if (theme === 'dark') {
+        themeIcon.classList.replace('bi-moon-stars', 'bi-sun');
+      } else {
+        themeIcon.classList.replace('bi-sun', 'bi-moon-stars');
+      }
+    }
+
+    // Form validation
+    const form = document.getElementById('loginForm');
+    form.addEventListener('submit', function (event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  </script>
+</body>
+</html>
