@@ -1,0 +1,91 @@
+<div class="page-heading">
+  <div class="page-heading-copy">
+    <span class="page-icon"><i class="bi bi-speedometer2" aria-hidden="true"></i></span>
+    <div>
+      <p class="eyebrow mb-1">Ikhtisar</p>
+      <h1 class="h3 mb-1">Dashboard</h1>
+      <p class="text-muted mb-0">Pantau produk, kategori, dan transaksi dari satu tempat.</p>
+    </div>
+  </div>
+  <div class="heading-actions">
+    <a href="/products/add" class="btn btn-primary btn-sm"><i class="bi bi-plus" aria-hidden="true"></i> Tambah Produk Baru</a>
+  </div>
+</div>
+
+<section class="row g-3 mt-1" aria-label="Dashboard metrics">
+  <div class="col-12 col-sm-6 col-xl-4">
+    <article class="metric-card metric-primary">
+      <div class="metric-top">
+        <span class="metric-label">Total Produk</span>
+        <span class="metric-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+      </div>
+      <div class="metric-value"><%= productCount %></div>
+      <div class="metric-meta">
+        <a href="/products" class="text-primary text-decoration-none small">Lihat semua produk &rarr;</a>
+      </div>
+    </article>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-4">
+    <article class="metric-card metric-success">
+      <div class="metric-top">
+        <span class="metric-label">Total Kategori</span>
+        <span class="metric-icon"><i class="bi bi-tags" aria-hidden="true"></i></span>
+      </div>
+      <div class="metric-value"><%= categoryCount %></div>
+      <div class="metric-meta">
+        <a href="/categories" class="text-success text-decoration-none small">Kelola kategori &rarr;</a>
+      </div>
+    </article>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-4">
+    <article class="metric-card metric-warning">
+      <div class="metric-top">
+        <span class="metric-label">Total Transaksi</span>
+        <span class="metric-icon"><i class="bi bi-cart-check" aria-hidden="true"></i></span>
+      </div>
+      <div class="metric-value"><%= transactionCount %></div>
+      <div class="metric-meta">
+        <a href="/transactions" class="text-warning text-decoration-none small">Lihat riwayat transaksi &rarr;</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- Placeholder untuk chart penjualan -->
+<section class="row g-3 mt-1">
+  <div class="col-12 col-xl-8">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="h5 mb-1 section-title"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i><span>Performa Penjualan</span></h2>
+          <p class="text-muted mb-0">Pendapatan bulanan dibandingkan dengan target.</p>
+        </div>
+      </div>
+      <div class="chart-bars" aria-label="Sales performance chart">
+        <div class="chart-column bar-42"><span></span><small>Jan</small></div>
+        <div class="chart-column bar-58"><span></span><small>Feb</small></div>
+        <div class="chart-column bar-51"><span></span><small>Mar</small></div>
+        <div class="chart-column bar-72"><span></span><small>Apr</small></div>
+        <div class="chart-column bar-66"><span></span><small>May</small></div>
+        <div class="chart-column bar-83"><span></span><small>Jun</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-4">
+    <div class="panel h-100">
+      <div class="panel-header">
+        <div>
+          <h2 class="h5 mb-1 section-title"><i class="bi bi-activity" aria-hidden="true"></i><span>Aktivitas Terbaru</span></h2>
+          <p class="text-muted mb-0">Update operasional terbaru.</p>
+        </div>
+      </div>
+      <div class="activity-list">
+        <div class="activity-item"><span class="activity-dot bg-primary"></span><div><p class="mb-1 fw-semibold">Produk baru ditambahkan</p><p class="text-muted small mb-0">Stok awal telah diperbarui.</p></div></div>
+        <div class="activity-item"><span class="activity-dot bg-success"></span><div><p class="mb-1 fw-semibold">Transaksi berhasil</p><p class="text-muted small mb-0">Penjualan 3 item diproses.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>

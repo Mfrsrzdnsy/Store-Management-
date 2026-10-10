@@ -1,0 +1,90 @@
+<div class="page-heading mb-4">
+  <div class="page-heading-copy">
+    <span class="page-icon"><i class="bi bi-folder-plus" aria-hidden="true"></i></span>
+    <div>
+      <p class="eyebrow mb-1">Manajemen Inventaris</p>
+      <h1 class="h3 mb-1">Tambah Kategori</h1>
+      <p class="text-muted mb-0">Tambahkan pengelompokan barang baru.</p>
+    </div>
+  </div>
+  <div class="heading-actions">
+    <a href="/categories" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left" aria-hidden="true"></i> Kembali</a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12 col-xl-8 mx-auto">
+    <div class="panel">
+      <div class="panel-header border-bottom pb-3 mb-4">
+        <div>
+          <h2 class="h5 mb-1 section-title"><i class="bi bi-card-heading" aria-hidden="true"></i><span>Informasi Kategori</span></h2>
+        </div>
+      </div>
+      
+      <div class="panel-body px-4 pb-4">
+        <form action="/categories/add" method="POST">
+          <div class="mb-4">
+            <label for="name" class="form-label fw-semibold">Nama Kategori <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Contoh: Elektronik, Pakaian, Makanan..." required>
+          </div>
+          
+          <div class="mb-5">
+            <label for="description" class="form-label fw-semibold">Deskripsi</label>
+            <textarea class="form-control" id="description" name="description" rows="4" placeholder="Keterangan singkat tentang kategori ini..."></textarea>
+          </div>
+          
+          <hr class="mb-4">
+          
+          <div class="d-flex justify-content-end gap-2">
+            <a href="/categories" class="btn btn-light">Batal</a>
+            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-save me-2"></i> Simpan Kategori</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelector('form[action="/categories/add"]').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = this;
+    const btn = form.querySelector('button[type="submit"]');
+    
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Menyimpan...';
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: new URLSearchParams(new FormData(form))
+      });
+
+      if (response.ok || response.redirected) {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Kategori baru berhasil ditambahkan.',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        window.location.href = '/categories';
+      } else {
+        throw new Error('Gagal menyimpan data');
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Terjadi kesalahan saat menyimpan data.'
+      });
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-save me-2"></i> Simpan Kategori';
+    }
+  });
+</script>

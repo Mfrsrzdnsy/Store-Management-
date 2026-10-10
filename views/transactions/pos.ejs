@@ -1,0 +1,366 @@
+<div class="row h-100">
+  <!-- Area Produk (Kiri) -->
+  <div class="col-md-7 col-lg-8">
+    <div class="panel h-100 mb-0">
+      <div class="panel-header border-bottom">
+        <div>
+          <h2 class="h5 mb-1 section-title"><i class="bi bi-grid" aria-hidden="true"></i><span>Pilih Produk</span></h2>
+        </div>
+        <div class="w-50">
+          <input type="text" id="searchProduct" class="form-control form-control-sm" placeholder="Cari nama barang atau scan barcode..." autofocus>
+        </div>
+      </div>
+      
+      <div class="panel-body p-3" style="max-height: calc(100vh - 200px); overflow-y: auto;">
+        <div class="row g-3" id="productGrid">
+          <% if (products && products.length > 0) { %>
+            <% products.forEach(product => { %>
+              <div class="col-6 col-md-4 col-xl-3 product-item" data-name="<%= product.name.toLowerCase() %>" data-sku="<%= (product.sku || '').toLowerCase() %>">
+                <div class="card h-100 cursor-pointer shadow-sm product-card" 
+                     data-id="<%= product.id %>" 
+                     data-sku="<%= product.sku || '' %>"
+                     data-name="<%= product.name %>" 
+                     data-price="<%= product.price %>" 
+                     data-stock="<%= product.stock %>" 
+                     onclick="addToCartFromElement(this)">
+                  <div class="card-body p-3 text-center d-flex flex-column justify-content-center">
+                    <h6 class="card-title fw-semibold mb-1" style="font-size: 0.9rem;"><%= product.name %></h6>
+                    <p class="text-success fw-bold mb-1 small">Rp <%= parseFloat(product.price).toLocaleString('id-ID') %></p>
+                    <small class="text-muted" style="font-size: 0.75rem;">Stok: <%= product.stock %></small>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="col-12 text-center py-5 text-muted">
+              Tidak ada produk yang tersedia atau stok habis.
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Area Keranjang (Kanan) -->
+  <div class="col-md-5 col-lg-4">
+    <div class="panel h-100 mb-0 d-flex flex-column">
+      <div class="panel-header border-bottom">
+        <div>
+          <h2 class="h5 mb-1 section-title"><i class="bi bi-cart" aria-hidden="true"></i><span>Keranjang</span></h2>
+        </div>
+        <button class="btn btn-outline-danger btn-sm" onclick="clearCart()"><i class="bi bi-trash"></i> Kosongkan</button>
+      </div>
+      
+      <div class="panel-body flex-grow-1 p-0" style="overflow-y: auto;">
+        <table class="table align-middle mb-0">
+          <tbody id="cartItems">
+            <tr>
+              <td colspan="4" class="text-center text-muted py-4 small">Keranjang masih kosong.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="panel-footer bg-light p-3 border-top mt-auto">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="fw-semibold">Total:</span>
+          <span class="fw-bold text-success fs-5" id="cartTotal">Rp 0</span>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label small">Metode Pembayaran</label>
+          <select id="paymentMethod" class="form-select form-select-sm">
+            <option value="Cash">Cash (Tunai)</option>
+            <option value="Debit">Debit Card</option>
+            <option value="QRIS">QRIS / E-Wallet</option>
+          </select>
+        </div>
+        
+        <button class="btn btn-primary w-100 py-2 fw-bold" id="btnCheckout" onclick="processCheckout()" disabled>
+          BAYAR SEKARANG
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .product-card { transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+  .product-card:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; border-color: #0d6efd; }
+  body { overflow: hidden; } /* Prevent main scrolling on POS screen */
+</style>
+
+<script>
+  let cart = [];
+
+  // 1. Pencarian dan Scan khusus saat kursor berada di dalam input pencarian
+  const searchInput = document.getElementById('searchProduct');
+  
+  searchInput.addEventListener('input', function(e) {
+    const term = e.target.value.trim().toLowerCase();
+    
+    // Cek apakah ketikan persis sama dengan salah satu SKU (Auto-add tanpa Enter)
+    if (term) {
+      const exactMatchCard = document.querySelector(`.product-card[data-sku="${term}"]`);
+      if (exactMatchCard) {
+        addToCartFromElement(exactMatchCard);
+        
+        // Efek visual sukses
+        exactMatchCard.style.transform = 'scale(1.05)';
+        setTimeout(() => exactMatchCard.style.transform = '', 200);
+
+        // Reset pencarian
+        this.value = '';
+        
+        // Kembalikan semua item agar tampil
+        document.querySelectorAll('.product-item').forEach(el => {
+          el.style.display = 'block';
+        });
+        return; // Hentikan fungsi di sini
+      }
+    }
+
+    // Jika belum ada yang cocok persis (sedang mengetik manual)
+    document.querySelectorAll('.product-item').forEach(el => {
+      const name = el.getAttribute('data-name');
+      const sku = el.getAttribute('data-sku') || '';
+      if(name.includes(term) || sku.includes(term)) {
+        el.style.display = 'block';
+      } else {
+        el.style.display = 'none';
+      }
+    });
+  });
+
+  searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const term = this.value.trim().toLowerCase();
+      if (!term) return;
+
+      // Cari berdasarkan SKU persis, jika tidak ada cari nama yang mengandung kata tersebut
+      let productCard = document.querySelector(`.product-card[data-sku="${term}"]`);
+      
+        // Fallback: Jika tidak ketemu SKU, cari card pertama yang masih tampil (hasil filter input)
+      if (!productCard) {
+        const visibleItem = Array.from(document.querySelectorAll('.product-item')).find(el => el.style.display !== 'none');
+        if (visibleItem) {
+          productCard = visibleItem.querySelector('.product-card');
+        }
+      }
+
+      if (productCard) {
+        addToCartFromElement(productCard);
+        
+        // Efek visual sukses
+        productCard.style.transform = 'scale(1.05)';
+        setTimeout(() => productCard.style.transform = '', 200);
+
+        // Reset pencarian
+        this.value = '';
+        this.dispatchEvent(new Event('input')); // Reset filter list
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Tidak ditemukan',
+          text: 'Produk tidak ditemukan!',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      }
+    }
+  });
+
+  // 2. Barcode Scanner Listener Global (Saat kursor TIDAK di dalam kotak pencarian)
+  let barcodeBuffer = '';
+  let barcodeTimeout;
+
+  document.addEventListener('keypress', function(e) {
+    // Jika fokus sedang berada di dalam search box atau input lain, biarkan event handler masing-masing yang mengurus
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (e.key === 'Enter') {
+      if (barcodeBuffer.length > 0) {
+        const productCard = document.querySelector(`.product-card[data-sku="${barcodeBuffer.toLowerCase()}"]`);
+        
+        if (productCard) {
+          addToCartFromElement(productCard);
+          
+          productCard.style.transform = 'scale(1.05)';
+          setTimeout(() => productCard.style.transform = '', 200);
+        } else {
+          console.warn("Produk dengan SKU/Barcode '" + barcodeBuffer + "' tidak ditemukan.");
+        }
+        barcodeBuffer = '';
+        e.preventDefault();
+      }
+    } else {
+      barcodeBuffer += e.key;
+      clearTimeout(barcodeTimeout);
+      
+      barcodeTimeout = setTimeout(() => {
+        barcodeBuffer = '';
+      }, 50); 
+    }
+  });
+
+  // Ekstraktor data dari elemen HTML (mencegah error tanda kutip)
+  function addToCartFromElement(el) {
+    const id = el.getAttribute('data-id');
+    const name = el.getAttribute('data-name');
+    const price = parseFloat(el.getAttribute('data-price'));
+    const maxStock = parseInt(el.getAttribute('data-stock'));
+    addToCart(id, name, price, maxStock);
+  }
+
+  // Tambah ke keranjang
+  function addToCart(id, name, price, maxStock) {
+    const existing = cart.find(item => item.productId === id);
+    if(existing) {
+      if(existing.quantity < maxStock) {
+        existing.quantity++;
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Stok Terbatas',
+          text: 'Maksimal stok tercapai!',
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 2000
+        });
+      }
+    } else {
+      cart.push({ productId: id, name, price, quantity: 1, maxStock });
+    }
+    renderCart();
+  }
+
+  function updateQty(id, delta) {
+    const item = cart.find(i => i.productId === id);
+    if(item) {
+      item.quantity += delta;
+      if(item.quantity <= 0) {
+        cart = cart.filter(i => i.productId !== id);
+      } else if (item.quantity > item.maxStock) {
+        item.quantity = item.maxStock;
+        Swal.fire({
+          icon: 'warning',
+          title: 'Stok Terbatas',
+          text: 'Maksimal stok tercapai!',
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 2000
+        });
+      }
+    }
+    renderCart();
+  }
+
+  function clearCart() {
+    if (cart.length === 0) return;
+    Swal.fire({
+      title: 'Kosongkan keranjang?',
+      text: "Semua barang di keranjang akan dihapus.",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#secondary',
+      confirmButtonText: 'Ya, kosongkan!',
+      cancelButtonText: 'Batal'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        cart = [];
+        renderCart();
+      }
+    });
+  }
+
+  function renderCart() {
+    const tbody = document.getElementById('cartItems');
+    const totalEl = document.getElementById('cartTotal');
+    const btnCheckout = document.getElementById('btnCheckout');
+    
+    if(cart.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4 small">Keranjang masih kosong.</td></tr>';
+      totalEl.innerText = 'Rp 0';
+      btnCheckout.disabled = true;
+      return;
+    }
+    
+    btnCheckout.disabled = false;
+    let total = 0;
+    let html = '';
+    
+    cart.forEach(item => {
+      const subtotal = item.price * item.quantity;
+      total += subtotal;
+      html += `
+        <tr>
+          <td>
+            <div class="fw-semibold small">${item.name}</div>
+            <div class="text-muted" style="font-size:0.75rem">Rp ${item.price.toLocaleString('id-ID')}</div>
+          </td>
+          <td width="100">
+            <div class="input-group input-group-sm">
+              <button class="btn btn-outline-secondary px-2" type="button" onclick="updateQty('${item.productId}', -1)">-</button>
+              <input type="text" class="form-control text-center px-0" value="${item.quantity}" readonly>
+              <button class="btn btn-outline-secondary px-2" type="button" onclick="updateQty('${item.productId}', 1)">+</button>
+            </div>
+          </td>
+          <td class="text-end fw-semibold small">Rp ${subtotal.toLocaleString('id-ID')}</td>
+        </tr>
+      `;
+    });
+    
+    tbody.innerHTML = html;
+    totalEl.innerText = 'Rp ' + total.toLocaleString('id-ID');
+  }
+
+  async function processCheckout() {
+    if(cart.length === 0) return;
+    
+    const paymentMethod = document.getElementById('paymentMethod').value;
+    const btn = document.getElementById('btnCheckout');
+    
+    btn.disabled = true;
+    btn.innerText = 'Memproses...';
+    
+    try {
+      const res = await fetch('/transactions/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: cart, paymentMethod })
+      });
+      
+      const data = await res.json();
+      if(data.success) {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Transaksi berhasil disimpan.',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        window.location.href = '/transactions/' + data.transactionId;
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal',
+          text: data.message || 'Transaksi gagal diproses.'
+        });
+        btn.disabled = false;
+        btn.innerText = 'BAYAR SEKARANG';
+      }
+    } catch(err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Terjadi kesalahan jaringan.'
+      });
+      btn.disabled = false;
+      btn.innerText = 'BAYAR SEKARANG';
+    }
+  }
+</script>

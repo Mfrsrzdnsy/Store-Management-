@@ -1,0 +1,127 @@
+<div class="page-heading mb-4">
+  <div class="page-heading-copy">
+    <span class="page-icon"><i class="bi bi-plus-circle" aria-hidden="true"></i></span>
+    <div>
+      <p class="eyebrow mb-1">Manajemen Inventaris</p>
+      <h1 class="h3 mb-1">Tambah Produk Baru</h1>
+      <p class="text-muted mb-0">Masukkan detail barang baru ke dalam sistem.</p>
+    </div>
+  </div>
+  <div class="heading-actions">
+    <a href="/products" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left" aria-hidden="true"></i> Kembali</a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12 col-xl-8 mx-auto">
+    <div class="panel">
+      <div class="panel-header border-bottom pb-3 mb-4">
+        <div>
+          <h2 class="h5 mb-1 section-title"><i class="bi bi-card-heading" aria-hidden="true"></i><span>Informasi Produk</span></h2>
+        </div>
+      </div>
+      
+      <div class="panel-body px-4 pb-4">
+        <form action="/products/add" method="POST">
+          <div class="mb-4">
+            <label for="name" class="form-label fw-semibold">Nama Produk <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Contoh: Sepatu Sneakers Putih" required>
+          </div>
+          
+          <div class="row g-4 mb-4">
+            <div class="col-md-6">
+              <label for="sku" class="form-label fw-semibold">SKU / Barcode</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                <input type="text" class="form-control" id="sku" name="sku" placeholder="Scan barcode atau ketik manual...">
+              </div>
+              <div class="form-text small text-muted">Arahkan kursor ke kolom ini, lalu gunakan scanner barcode.</div>
+            </div>
+            <div class="col-md-6">
+              <label for="CategoryId" class="form-label fw-semibold">Kategori</label>
+              <select class="form-select" id="CategoryId" name="CategoryId">
+                <option value="">-- Pilih Kategori --</option>
+                <% if(typeof categories !== 'undefined') { %>
+                  <% categories.forEach(category => { %>
+                    <option value="<%= category.id %>"><%= category.name %></option>
+                  <% }) %>
+                <% } %>
+              </select>
+            </div>
+          </div>
+          
+          <div class="row g-4 mb-4">
+            <div class="col-md-6">
+              <label for="price" class="form-label fw-semibold">Harga <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0">Rp</span>
+                <input type="number" class="form-control border-start-0 ps-0" id="price" name="price" required min="0" placeholder="0">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="stock" class="form-label fw-semibold">Stok Awal <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="stock" name="stock" required min="0" value="0">
+            </div>
+          </div>
+          
+          <div class="mb-5">
+            <label for="description" class="form-label fw-semibold">Deskripsi Singkat</label>
+            <textarea class="form-control" id="description" name="description" rows="4" placeholder="Tuliskan keterangan detail mengenai produk ini..."></textarea>
+          </div>
+          
+          <hr class="mb-4">
+          
+          <div class="d-flex justify-content-end gap-2">
+            <a href="/products" class="btn btn-light">Batal</a>
+            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-save me-2"></i> Simpan Produk</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelector('form[action="/products/add"]').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = this;
+    const btn = form.querySelector('button[type="submit"]');
+    
+    // Validasi form dasar HTML5
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Menyimpan...';
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: new URLSearchParams(new FormData(form))
+      });
+
+      if (response.ok || response.redirected) {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Data produk berhasil ditambahkan.',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        window.location.href = '/products';
+      } else {
+        throw new Error('Gagal menyimpan data');
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Terjadi kesalahan saat menyimpan data.'
+      });
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-save me-2"></i> Simpan Produk';
+    }
+  });
+</script>

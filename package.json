@@ -1,0 +1,22 @@
+{
+  "name": "store-management",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "body-parser": "^2.3.0",
+    "ejs": "^7.0.1",
+    "express": "^5.3.0",
+    "express-ejs-layouts": "^2.5.1",
+    "moment": "^2.31.0",
+    "sequelize": "^6.37.8",
+    "sqlite3": "^6.0.1"
+  }
+}

@@ -1,0 +1,70 @@
+<div class="page-heading mb-4">
+  <div class="page-heading-copy">
+    <span class="page-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+    <div>
+      <p class="eyebrow mb-1">Manajemen Inventaris</p>
+      <h1 class="h3 mb-1">Daftar Produk</h1>
+      <p class="text-muted mb-0">Lihat, edit, dan kelola semua barang di toko Anda.</p>
+    </div>
+  </div>
+  <div class="heading-actions">
+    <a href="/products/add" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg" aria-hidden="true"></i> Tambah Produk</a>
+  </div>
+</div>
+
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <h2 class="h5 mb-1 section-title"><i class="bi bi-list-ul" aria-hidden="true"></i><span>Data Produk</span></h2>
+    </div>
+    <form class="d-flex" role="search">
+      <input class="form-control form-control-sm me-2" type="search" placeholder="Cari SKU atau nama..." aria-label="Search">
+      <button class="btn btn-outline-secondary btn-sm" type="button"><i class="bi bi-search"></i></button>
+    </form>
+  </div>
+  
+  <div class="table-responsive">
+    <table class="table align-middle mb-0 table-hover">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">SKU</th>
+          <th scope="col">Nama Produk</th>
+          <th scope="col">Kategori</th>
+          <th scope="col">Harga</th>
+          <th scope="col">Stok</th>
+          <th scope="col" class="text-end">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (products && products.length > 0) { %>
+          <% products.forEach(product => { %>
+            <tr>
+              <td><span class="badge text-bg-light border"><%= product.sku || '-' %></span></td>
+              <td class="fw-semibold"><%= product.name %></td>
+              <td><%= product.Category ? product.Category.name : '-' %></td>
+              <td>Rp <%= parseFloat(product.price).toLocaleString('id-ID') %></td>
+              <td>
+                <% if (product.stock <= 5) { %>
+                  <span class="badge text-bg-danger"><%= product.stock %> Tersisa</span>
+                <% } else { %>
+                  <span class="badge text-bg-success"><%= product.stock %></span>
+                <% } %>
+              </td>
+              <td class="text-end">
+                <a href="#" class="btn btn-light btn-sm text-primary" title="Edit"><i class="bi bi-pencil"></i></a>
+                <a href="#" class="btn btn-light btn-sm text-danger" title="Hapus" onclick="return confirmDelete(event, '/products/delete/<%= product.id %>', 'Yakin ingin menghapus <%= product.name %>?');"><i class="bi bi-trash"></i></a>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="6" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+              Belum ada data produk. Silakan tambahkan produk baru.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>

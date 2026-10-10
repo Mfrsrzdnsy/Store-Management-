@@ -1,0 +1,91 @@
+<div class="page-heading mb-4">
+  <div class="page-heading-copy">
+    <span class="page-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span>
+    <div>
+      <p class="eyebrow mb-1">Kasir & Penjualan</p>
+      <h1 class="h3 mb-1">Detail Transaksi #TRX-<%= transaction.id %></h1>
+    </div>
+  </div>
+  <div class="heading-actions">
+    <a href="/transactions" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Kembali</a>
+    <button onclick="window.print()" class="btn btn-primary btn-sm"><i class="bi bi-printer"></i> Cetak Struk</button>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12 col-xl-8 mx-auto">
+    <div class="card border-0 shadow-sm mb-4 print-container">
+      <div class="card-body p-5">
+        <div class="text-center mb-4">
+          <i class="bi bi-shop fs-1 text-primary"></i>
+          <h4 class="fw-bold mt-2">Store Management</h4>
+          <p class="text-muted small">Jl. Contoh Alamat Toko No. 123<br>Telp: (021) 12345678</p>
+        </div>
+
+        <div class="d-flex justify-content-between mb-4 border-bottom pb-3">
+          <div>
+            <div class="text-muted small">No. Transaksi:</div>
+            <div class="fw-semibold">#TRX-<%= transaction.id %></div>
+          </div>
+          <div class="text-end">
+            <div class="text-muted small">Tanggal Waktu:</div>
+            <div class="fw-semibold">
+              <% 
+                const date = new Date(transaction.createdAt);
+                const formatted = date.toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'}) + ' ' + date.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+              %>
+              <%= formatted %>
+            </div>
+          </div>
+        </div>
+
+        <table class="table mb-4">
+          <thead class="table-light">
+            <tr>
+              <th>Item</th>
+              <th class="text-center">Qty</th>
+              <th class="text-end">Harga</th>
+              <th class="text-end">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% transaction.TransactionItems.forEach(item => { %>
+              <tr>
+                <td><%= item.Product ? item.Product.name : 'Produk Dihapus' %></td>
+                <td class="text-center"><%= item.quantity %></td>
+                <td class="text-end">Rp <%= parseFloat(item.priceAtTime).toLocaleString('id-ID') %></td>
+                <td class="text-end fw-semibold">Rp <%= parseFloat(item.subtotal).toLocaleString('id-ID') %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+
+        <div class="row justify-content-end">
+          <div class="col-sm-6 col-md-5">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Metode Pembayaran:</span>
+              <span class="fw-semibold"><%= transaction.paymentMethod %></span>
+            </div>
+            <div class="d-flex justify-content-between border-top pt-2">
+              <span class="fw-bold fs-5">TOTAL:</span>
+              <span class="fw-bold text-success fs-5">Rp <%= parseFloat(transaction.totalAmount).toLocaleString('id-ID') %></span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="text-center mt-5 pt-3 border-top text-muted small">
+          Terima kasih telah berbelanja di toko kami!
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  @media print {
+    body * { visibility: hidden; }
+    .print-container, .print-container * { visibility: visible; }
+    .print-container { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none!important; border: none!important; }
+    #sidebar, .top-navbar, .heading-actions { display: none !important; }
+  }
+</style>
